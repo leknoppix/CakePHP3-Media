@@ -28,7 +28,7 @@ class MediasController extends AppController {
     public function beforeFilter(){
         parent::beforeFilter();
         $this->loadModel("Media.Medias");
-        $this->layout = 'uploader';
+        $this->viewBuilder()->setLayout('uploader')
         if(in_array('Security', $this->components)){
             $this->Security->unlockedActions = array('upload', 'order','index','delete','thumb');
         }
@@ -67,7 +67,7 @@ class MediasController extends AppController {
     * Upload (Ajax)
     **/
     public function upload($ref, $ref_id){
-    	$this->layout = null;
+        $this->viewBuilder()->setLayout(null);
         $this->autoRender = false;
         if(!$this->canUploadMedias($ref, $ref_id)){
             throw new ForbiddenException();
@@ -90,8 +90,8 @@ class MediasController extends AppController {
         $editor = isset($this->request->params['named']['editor']) ? $this->request->params['named']['editor'] : false;
         $id = isset($this->request->query['id']) ? $this->request->query['id'] : false;
         $this->set(compact('media', 'thumbID', 'editor', 'id'));
-       
-        $this->layout = 'json';
+        
+        $this->viewBuilder()->setLayout('json');   
         $this->render('media');
     }
 
@@ -99,7 +99,7 @@ class MediasController extends AppController {
     * Suppression (Ajax)
     **/
     public function delete($id){
-    	$this->layout = null;
+        $this->viewBuilder()->setLayout(null);
         $this->autoRender = false;
         $media = $this->Medias->get($id);
         if(empty($media)){
@@ -134,7 +134,7 @@ class MediasController extends AppController {
     }
 
     public function order(){
-    	$this->layout = null;
+    $this->viewBuilder()->setLayout(null);
     	$this->autoRender = false;
     	
     	if(!empty($this->request->data['Media'])){
