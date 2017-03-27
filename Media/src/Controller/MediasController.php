@@ -13,11 +13,13 @@ class MediasController extends AppController {
     public $order = ['Medias.position ASC'];
     public $helpers = ['Html'];
 
-   	public function isAuthorized($user = null){
+   public function isAuthorized($user = null)
+   {
         return true;
-    }
+   }
 
-    public function canUploadMedias($ref, $ref_id){
+    public function canUploadMedias($ref, $ref_id)
+    {
         if(method_exists('App\Controller\AppController', 'canUploadMedias')){
             return parent::canUploadMedias($ref, $ref_id);
         }else{
@@ -25,8 +27,9 @@ class MediasController extends AppController {
         }
     }
 
-    public function beforeFilter(){
-        parent::beforeFilter();
+    public function beforeFilter(Event $event)
+    {
+        parent::beforeFilter($event);
         $this->loadModel("Media.Medias");
         $this->viewBuilder()->setLayout('uploader')
         if(in_array('Security', $this->components)){
@@ -37,19 +40,20 @@ class MediasController extends AppController {
     /**
     * Liste les médias
     **/
-    public function index($ref, $ref_id){
+    
+    public function index($ref, $ref_id)
+    {
         if(!$this->canUploadMedias($ref, $ref_id)){
             throw new ForbiddenException();
         }
-        
+        $this->loadModel($ref);
         $this->set(compact('ref', 'ref_id'));
         if(!in_array('Media', $this->$ref->Behaviors()->loaded())){
             return $this->render('nobehavior');
         }
         $id = isset($this->request->query['id']) ? $this->request->query['id'] : false;
-        $model = Inflector::singularize($ref);
         $medias = $this->Medias->find('all',array(
-        	'conditions' => array('ref_id' => $ref_id,'ref' => $model)
+        	'conditions' => array('ref_id' => $ref_id, 'ref' => $ref)
         ))->all();
 		
         $thumbID = false;
@@ -66,6 +70,7 @@ class MediasController extends AppController {
     /**
     * Upload (Ajax)
     **/
+
     public function upload($ref, $ref_id){
         $this->viewBuilder()->setLayout(null);
         $this->autoRender = false;
@@ -73,9 +78,9 @@ class MediasController extends AppController {
             throw new ForbiddenException();
         }
         $media = $this->Medias->newEntity();
-	    $model = Inflector::singularize($ref);
-        if(isset($_FILES) && !empty($_FILES)) {
-        	$data['ref'] = $model;
+	
+	if (isset($_FILES) && !empty($_FILES)) {
+        	$data['ref'] = $ref;
 	        $data['ref_id'] = $ref_id;
 	        $data['file'] = $_FILES['file'];
 	        $new_media = $this->Medias->patchEntity($media, $data);
@@ -87,6 +92,7 @@ class MediasController extends AppController {
 	        }
 	    }
         $this->loadModel($ref);
+        $thumbID = $this->$ref->hasField('media_id');
         $editor = isset($this->request->params['named']['editor']) ? $this->request->params['named']['editor'] : false;
         $id = isset($this->request->query['id']) ? $this->request->query['id'] : false;
         $this->set(compact('media', 'thumbID', 'editor', 'id'));
@@ -102,10 +108,10 @@ class MediasController extends AppController {
         $this->viewBuilder()->setLayout(null);
         $this->autoRender = false;
         $media = $this->Medias->get($id);
-        if(empty($media)){
+        if (empty($media)){
             throw new NotFoundException();
         }
-        if(!$this->canUploadMedias($media->ref, $media->ref_id)){
+        if (!$this->canUploadMedias($media->ref, $media->ref_id)){
             throw new ForbiddenException();
         }
         $this->Medias->delete($media, ['atomic' => false]);
@@ -126,7 +132,7 @@ class MediasController extends AppController {
         $ref = $media->ref;
         $ref_id = $media->ref_id;
         $this->loadModel($ref);
-        $table = Inflector::pluralize($ref);
+        $table = $ref;
         $reference = $this->$table->get($ref_id);
         $reference->media_id = $id;
         $this->$table->save($reference);

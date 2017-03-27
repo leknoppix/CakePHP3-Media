@@ -6,7 +6,11 @@ use Cake\View\Helper;
 
 class MediaHelper extends Helper{
 
-	public $helpers = array('Html','Form', 'Url');
+	public $helpers = [
+	    'Html',
+	    'Form',
+	    'Url'
+	];
 	public $javascript = false;
 	public $explorer = false;
 	
@@ -23,7 +27,7 @@ class MediaHelper extends Helper{
 
 	public function redactor($field, $ref, $ref_id, $options = array()) {
 		$this->Html->script('/media/js/redactor/redactor.min.js', array('block' => 'script'));
-		$this->Html->css('/Media/js/redactor/redactor.css', array('block' => 'css'));
+		$this->Html->css('/media/js/redactor/redactor.css', array('block' => 'css'));
 		return $this->textarea($field, $ref, $ref_id, 'redactor', $options);
 	}
 
@@ -38,6 +42,6 @@ class MediaHelper extends Helper{
 	}
 
 	public function iframe($ref,$ref_id){
-		return '<iframe src="' . $this->Url->build("/media/Medias/index/$ref/$ref_id") . '" style="width:100%;" id="medias-' . $ref . '-' . $ref_id . '"></iframe>';
+		return '<iframe src="' . $this->Url->build("/media/medias/index/$ref/$ref_id") . '" style="width:100%;" id="medias-' . $ref . '-' . $ref_id . '"></iframe>';
 	}
 }
